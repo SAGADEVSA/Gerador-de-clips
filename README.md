@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ClipForge AI Backend
 
 Backend API for ClipForge AI - AI-powered video clipping for TikTok and YouTube Shorts.
@@ -72,3 +73,6 @@ docker-compose up --build
 ## License
 
 MIT
+=======
+# Gerador-de-clips
+>>>>>>> 8104f32ff4f3fea30d1d9becfc8c30aa37f59d29
