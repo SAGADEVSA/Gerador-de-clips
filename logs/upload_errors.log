@@ -1,0 +1,22 @@
+[2026-02-23T18:18:35.971Z] Upload error: Error: Failed to download YouTube video: Error: Could not extract functions
+    at downloadYouTubeVideo (C:\Users\usuario\Downloads\backend\src\services\youtubeService.ts:28:11)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async uploadVideo (C:\Users\usuario\Downloads\backend\src\controllers\upload.ts:50:30)
+[2026-02-23T18:25:01.820Z] Upload error: Error: Failed to download YouTube video: spawn yt-dlp ENOENT
+    at downloadYouTubeVideo (C:\Users\usuario\Downloads\backend\src\services\youtubeService.ts:43:11)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async uploadVideo (C:\Users\usuario\Downloads\backend\src\controllers\upload.ts:50:30)
+[2026-02-23T18:27:43.647Z] Upload error: PrismaClientKnownRequestError: 
+Invalid `prisma.video.create()` invocation in
+C:\Users\usuario\Downloads\backend\src\controllers\upload.ts:62:38
+
+  59 }
+  60 
+  61 // Save to database
+→ 62 const video = await prisma.video.create(
+Foreign key constraint violated: `videos_userId_fkey (index)`
+    at $n.handleRequestError (C:\Users\usuario\Downloads\backend\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\usuario\Downloads\backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\usuario\Downloads\backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (C:\Users\usuario\Downloads\backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async uploadVideo (C:\Users\usuario\Downloads\backend\src\controllers\upload.ts:62:19)
