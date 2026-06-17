@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 
 interface Clip {
   id: string;
   title: string;
   score: number;
-  start_time: number;
-  end_time: number;
-  status: string;
+  start: number;
+  end: number;
+  hook?: string;
   fileUrl: string;
 }
 
@@ -18,47 +19,43 @@ interface Video {
   clips: Clip[];
 }
 
-import { useState, useEffect } from 'react';
-
-interface Clip {
-  id: string;
-  title: string;
-  score: number;
-  start_time: number;
-  end_time: number;
-  status: string;
-  fileUrl: string;
-}
-
-interface Video {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: string;
-  clips: Clip[];
-}
-
-export const useVideos = (userId: string, refreshKey?: number) => {
+export const useVideos = (token: string | null, refreshKey?: number) => {
   const [data, setData] = useState<Video[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
+      if (!token) {
+        setError('Usuário não autenticado');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch(`http://localhost:8080/api/videos?userId=${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch videos');
+        const response = await fetch(`${API_BASE_URL}/api/videos`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (!response.ok) throw new Error('Falha ao buscar vídeos');
         const videos = await response.json();
         setData(videos);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        setError(err instanceof Error ? err.message : 'Erro desconhecido');
       } finally {
         setLoading(false);
       }
     };
 
-    if (userId) fetchVideos();
-  }, [userId, refreshKey]);
+    if (token) {
+      setLoading(true);
+      fetchVideos();
+    } else {
+      setData(null);
+      setLoading(false);
+    }
+  }, [token, refreshKey]);
 
   return { data, loading, error };
 };
@@ -71,7 +68,7 @@ export const useClips = (videoId: string) => {
   useEffect(() => {
     const fetchClips = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/clips/${videoId}`);
+        const response = await fetch(`${API_BASE_URL}/api/clips/${videoId}`);
         if (!response.ok) throw new Error('Failed to fetch clips');
         const clips = await response.json();
         setData(clips);

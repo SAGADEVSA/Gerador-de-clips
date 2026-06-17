@@ -1,18 +1,21 @@
 import express, { Request, Response } from 'express';
 import { prisma } from '../server';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
+router.use(authenticate);
+
 
 const getVideos = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
+    const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+      return res.status(401).json({ error: 'Not authenticated' });
     }
 
     const videos = await prisma.video.findMany({
-      where: { userId: userId as string },
+      where: { userId },
       include: {
         clips: true,
         jobs: {
@@ -44,6 +47,10 @@ const getVideo = async (req: Request, res: Response) => {
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
+    }
+
+    if (req.user && video.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     res.json(video);

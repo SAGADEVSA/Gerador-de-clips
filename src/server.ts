@@ -12,7 +12,8 @@ import { PrismaClient } from '@prisma/client';
 import uploadRoutes from './controllers/upload';
 import processRoutes from './controllers/process';
 import videoRoutes from './controllers/videos';
-import clipRoutes from './controllers/clips';
+import clipRoutes, { downloadClip } from './controllers/clips';
+import authRoutes from './controllers/auth';
 
 dotenv.config();
 
@@ -53,10 +54,12 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/process', processRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/clips', clipRoutes);
+app.get('/api/download/:clipId', downloadClip);
 
 // Health check
 app.get('/health', (req, res) => {

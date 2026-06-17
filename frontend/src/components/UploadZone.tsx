@@ -1,26 +1,32 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 
 interface UploadZoneProps {
-  userId: string;
+  token: string | null;
   onUpload?: () => void;
 }
 
-const UploadZone: React.FC<UploadZoneProps> = ({ userId, onUpload }) => {
+const UploadZone: React.FC<UploadZoneProps> = ({ token, onUpload }) => {
   const [file, setFile] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [uploading, setUploading] = useState(false);
 
   const handleFileUpload = async () => {
-    if (!file) return;
+    if (!file || !token) {
+      alert('Você precisa estar autenticado para enviar vídeos.');
+      return;
+    }
 
     setUploading(true);
     const formData = new FormData();
     formData.append('video', file);
-    formData.append('userId', userId);
 
     try {
-      const response = await fetch('http://localhost:8080/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
         body: formData,
       });
       if (!response.ok) throw new Error('Upload failed');
@@ -36,14 +42,20 @@ const UploadZone: React.FC<UploadZoneProps> = ({ userId, onUpload }) => {
   };
 
   const handleYouTubeUpload = async () => {
-    if (!youtubeUrl) return;
+    if (!youtubeUrl || !token) {
+      alert('Você precisa estar autenticado para enviar vídeos.');
+      return;
+    }
 
     setUploading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, youtubeUrl }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ youtubeUrl }),
       });
       if (!response.ok) throw new Error('Upload failed');
       const result = await response.json();

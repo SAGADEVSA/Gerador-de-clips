@@ -5,8 +5,10 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '../server';
 import { downloadYouTubeVideo } from '../services/youtubeService';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
+router.use(authenticate);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -36,10 +38,11 @@ const upload = multer({
 
 const uploadVideo = async (req: Request, res: Response) => {
   try {
-    const { userId, youtubeUrl } = req.body;
+    const { youtubeUrl } = req.body;
+    const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+      return res.status(401).json({ error: 'User must be authenticated to upload videos' });
     }
 
     let filePath: string;

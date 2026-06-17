@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 
 interface Video {
   id: string;
@@ -10,18 +11,27 @@ interface Video {
 
 interface RecentVideosProps {
   videos: Video[] | null;
+  token: string | null;
   onProcess?: () => void;
 }
 
-const RecentVideos: React.FC<RecentVideosProps> = ({ videos, onProcess }) => {
+const RecentVideos: React.FC<RecentVideosProps> = ({ videos, token, onProcess }) => {
   const [processing, setProcessing] = useState<string | null>(null);
 
   const handleProcess = async (videoId: string) => {
+    if (!token) {
+      alert('Você precisa estar autenticado para processar vídeos.');
+      return;
+    }
+
     setProcessing(videoId);
     try {
-      const response = await fetch('http://localhost:8080/api/process', {
+      const response = await fetch(`${API_BASE_URL}/api/process`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({ videoId }),
       });
       if (!response.ok) throw new Error('Process failed');

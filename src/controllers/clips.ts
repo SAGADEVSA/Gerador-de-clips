@@ -1,15 +1,20 @@
 import express, { Request, Response } from 'express';
 import { prisma } from '../server';
 import path from 'path';
+import { optionalAuthenticate } from '../middleware/auth';
 
 const router = express.Router();
+router.use(optionalAuthenticate);
 
 const getClips = async (req: Request, res: Response) => {
   try {
     const { videoId } = req.params;
+    const userId = req.user?.id;
 
     const clips = await prisma.clip.findMany({
-      where: { videoId },
+      where: userId
+        ? { videoId, video: { userId } }
+        : { videoId },
       orderBy: { score: 'desc' }
     });
 
@@ -25,11 +30,16 @@ const downloadClip = async (req: Request, res: Response) => {
     const { clipId } = req.params;
 
     const clip = await prisma.clip.findUnique({
-      where: { id: clipId }
+      where: { id: clipId },
+      include: { video: true }
     });
 
     if (!clip) {
       return res.status(404).json({ error: 'Clip not found' });
+    }
+
+    if (req.user && clip.video.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     const filePath = path.resolve(clip.fileUrl);
@@ -43,4 +53,5 @@ const downloadClip = async (req: Request, res: Response) => {
 router.get('/:videoId', getClips);
 router.get('/download/:clipId', downloadClip);
 
+export { downloadClip };
 export default router;
